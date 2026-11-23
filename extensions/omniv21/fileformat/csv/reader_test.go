@@ -20,6 +20,12 @@ func TestIsErrInvalidHeader(t *testing.T) {
 	assert.False(t, IsErrInvalidHeader(errors.New("test")))
 }
 
+func TestIsErrColumnValueConflict(t *testing.T) {
+	assert.True(t, IsErrColumnValueConflict(ErrColumnValueConflict("test")))
+	assert.Equal(t, "test", ErrColumnValueConflict("test").Error())
+	assert.False(t, IsErrColumnValueConflict(errors.New("test")))
+}
+
 func TestNewReader_InvalidXPath(t *testing.T) {
 	r, err := NewReader("test", nil, nil, "[invalid")
 	assert.Error(t, err)
@@ -66,6 +72,102 @@ func TestReader(t *testing.T) {
 			},
 		},
 		{
+			name: "columns reordered and undeclared columns ignored",
+			decl: &FileDecl{
+				Delimiter:      "|",
+				HeaderRowIndex: testlib.IntPtr(1),
+				DataRowIndex:   2,
+				Columns: []Column{
+					{Name: "a"},
+					{Name: "b with space", Alias: strs.StrPtr("b_with_space")},
+					{Name: "c"},
+				},
+			},
+			input: strings.NewReader(lf("c|note|a|b with space") +
+				lf("3|x|1|2") +
+				lf("C|y|A|B")),
+			expected: []interface{}{
+				`{ "a": "1", "b_with_space": "2", "c": "3" }`,
+				`{ "a": "A", "b_with_space": "B", "c": "C" }`,
+			},
+		},
+		{
+			name: "historical header aliases bound to declared columns",
+			decl: &FileDecl{
+				Delimiter:      ",",
+				HeaderRowIndex: testlib.IntPtr(1),
+				DataRowIndex:   2,
+				Columns: []Column{
+					{Name: "po_number", HeaderAliases: []string{"PO Number", "PO#"}},
+					{Name: "quantity", HeaderAliases: []string{"Qty"}},
+					{Name: "unit_price", HeaderAliases: []string{"Unit Price", "Price"}},
+				},
+			},
+			input: strings.NewReader(lf("Qty,PO Number,Price") +
+				lf("10,A-100,9.99") +
+				lf("20,A-101,5.50")),
+			expected: []interface{}{
+				`{ "po_number": "A-100", "quantity": "10", "unit_price": "9.99" }`,
+				`{ "po_number": "A-101", "quantity": "20", "unit_price": "5.50" }`,
+			},
+		},
+		{
+			name: "duplicate headers for same column with identical values",
+			decl: &FileDecl{
+				Delimiter:      ",",
+				HeaderRowIndex: testlib.IntPtr(1),
+				DataRowIndex:   2,
+				Columns: []Column{
+					{Name: "po_number", HeaderAliases: []string{"PO#"}},
+					{Name: "quantity"},
+				},
+			},
+			input: strings.NewReader(lf("quantity,PO#,po_number") +
+				lf("10,A-100,A-100")),
+			expected: []interface{}{
+				`{ "po_number": "A-100", "quantity": "10" }`,
+			},
+		},
+		{
+			name: "duplicate headers for same column with conflicting values",
+			decl: &FileDecl{
+				Delimiter:      ",",
+				HeaderRowIndex: testlib.IntPtr(1),
+				DataRowIndex:   2,
+				Columns: []Column{
+					{Name: "po_number", HeaderAliases: []string{"PO#"}},
+					{Name: "quantity"},
+				},
+			},
+			input: strings.NewReader(lf("quantity,PO#,po_number") +
+				lf("10,A-100,A-100") +
+				lf("20,A-101,A-102")),
+			expected: []interface{}{
+				`{ "po_number": "A-100", "quantity": "10" }`,
+				ErrColumnValueConflict("input 'test-input' line 3: column[2] 'PO#' and column[3] 'po_number' both map to declared column 'po_number' but have conflicting values 'A-101' and 'A-102'"),
+			},
+		},
+		{
+			name: "short record skips bound columns beyond record end",
+			decl: &FileDecl{
+				Delimiter:      ",",
+				HeaderRowIndex: testlib.IntPtr(1),
+				DataRowIndex:   2,
+				Columns: []Column{
+					{Name: "a"},
+					{Name: "b"},
+					{Name: "c"},
+				},
+			},
+			input: strings.NewReader(lf("c,b,a") +
+				lf("C1,B1,A1") +
+				lf("C2,B2")),
+			expected: []interface{}{
+				`{ "a": "A1", "b": "B1", "c": "C1" }`,
+				`{ "b": "B2", "c": "C2" }`,
+			},
+		},
+		{
 			name: "cannot jump to header row",
 			decl: &FileDecl{
 				Delimiter:      "|",
@@ -88,7 +190,7 @@ func TestReader(t *testing.T) {
 			},
 		},
 		{
-			name: "header columns less than the declared",
+			name: "declared column missing from header row",
 			decl: &FileDecl{
 				Delimiter:      "|",
 				HeaderRowIndex: testlib.IntPtr(2),
@@ -99,7 +201,7 @@ func TestReader(t *testing.T) {
 			},
 			input: strings.NewReader(lf("line1") + lf("a")),
 			expected: []interface{}{
-				ErrInvalidHeader("input 'test-input' line 2: actual header column size (1) is less than the size (2) declared in file_declaration.columns in schema"),
+				ErrInvalidHeader("input 'test-input' line 2: header row does not contain declared column 'b' (accepted headers: 'b')"),
 			},
 		},
 		{
@@ -114,7 +216,7 @@ func TestReader(t *testing.T) {
 			},
 			input: strings.NewReader(lf("line1") + lf("a|B")),
 			expected: []interface{}{
-				ErrInvalidHeader("input 'test-input' line 2: header column[2] 'B' does not match declared column name 'b' in schema"),
+				ErrInvalidHeader("input 'test-input' line 2: header row does not contain declared column 'b' (accepted headers: 'b')"),
 			},
 		},
 		{
@@ -176,5 +278,6 @@ func TestIsContinuableError(t *testing.T) {
 	r := &reader{}
 	assert.True(t, r.IsContinuableError(errors.New("some error")))
 	assert.False(t, r.IsContinuableError(ErrInvalidHeader("invalid header")))
+	assert.False(t, r.IsContinuableError(ErrColumnValueConflict("conflicting values")))
 	assert.False(t, r.IsContinuableError(io.EOF))
 }

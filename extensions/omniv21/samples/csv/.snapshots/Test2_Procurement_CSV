@@ -1,0 +1,16 @@
+[
+	{
+		"po": "A-100",
+		"quantity": 10,
+		"sku": "SKU-1",
+		"total": 99.9,
+		"unit_price": 9.99
+	},
+	{
+		"po": "A-101",
+		"quantity": 5,
+		"sku": "SKU-2",
+		"total": 62.5,
+		"unit_price": 12.5
+	}
+]

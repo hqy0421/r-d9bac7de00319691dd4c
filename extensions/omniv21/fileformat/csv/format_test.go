@@ -83,6 +83,40 @@ func TestValidateSchema(t *testing.T) {
 			err:         `schema 'test': file_declaration.columns contains duplicate alias 'a1'`,
 		},
 		{
+			name:   "file_declaration.columns has ambiguous header_aliases",
+			format: fileFormatCSV,
+			fileDecl: `
+				{
+					"file_declaration": {
+						"delimiter": ",",
+						"data_row_index": 2,
+						"columns": [
+							{ "name": "col1", "header_aliases": [ "COL 1" ] },
+							{ "name": "col2", "header_aliases": [ "COL 2", "col1" ] }
+						]
+					}
+				}`,
+			finalOutput: nil,
+			err:         `schema 'test': file_declaration.columns: header 'col1' is accepted by both column 'col1' and column 'col2'`,
+		},
+		{
+			name:   "file_declaration.columns header_alias conflicts with another column's name",
+			format: fileFormatCSV,
+			fileDecl: `
+				{
+					"file_declaration": {
+						"delimiter": ",",
+						"data_row_index": 2,
+						"columns": [
+							{ "name": "col1" },
+							{ "name": "col2", "header_aliases": [ "col1" ] }
+						]
+					}
+				}`,
+			finalOutput: nil,
+			err:         `schema 'test': file_declaration.columns: header 'col1' is accepted by both column 'col1' and column 'col2'`,
+		},
+		{
 			name:   "FINAL_OUTPUT decl is nil",
 			format: fileFormatCSV,
 			fileDecl: `
@@ -135,6 +169,24 @@ func TestValidateSchema(t *testing.T) {
 						"delimiter": ",",
 						"data_row_index": 1,
 						"columns": [ { "name": "col1" } ]
+					}
+				}`,
+			finalOutput: &transform.Decl{},
+			err:         "",
+		},
+		{
+			name:   "success with header_aliases",
+			format: fileFormatCSV,
+			fileDecl: `
+				{
+					"file_declaration": {
+						"delimiter": ",",
+						"header_row_index": 1,
+						"data_row_index": 2,
+						"columns": [
+							{ "name": "po_number", "header_aliases": [ "PO Number", "PO#" ] },
+							{ "name": "quantity" }
+						]
 					}
 				}`,
 			finalOutput: &transform.Decl{},

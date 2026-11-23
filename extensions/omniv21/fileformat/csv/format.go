@@ -82,6 +82,10 @@ func (f *csvFileFormat) validateFileDecl(decl *FileDecl) error {
 func (f *csvFileFormat) validateColumns(columns []Column) error {
 	namesSeen := map[string]bool{}
 	aliasesSeen := map[string]bool{}
+	// acceptedHeaders maps an accepted header name (canonical 'name' or one of the
+	// 'header_aliases') to the column that accepts it. A header name accepted by two
+	// different columns would make header row binding ambiguous, thus is rejected.
+	acceptedHeaders := map[string]string{}
 	for _, column := range columns {
 		if _, found := namesSeen[column.Name]; found {
 			return f.FmtErr("file_declaration.columns contains duplicate name '%s'", column.Name)
@@ -92,6 +96,14 @@ func (f *csvFileFormat) validateColumns(columns []Column) error {
 				return f.FmtErr("file_declaration.columns contains duplicate alias '%s'", *column.Alias)
 			}
 			aliasesSeen[*column.Alias] = true
+		}
+		for _, header := range column.acceptedHeaders() {
+			if other, found := acceptedHeaders[header]; found && other != column.Name {
+				return f.FmtErr(
+					"file_declaration.columns: header '%s' is accepted by both column '%s' and column '%s'",
+					header, other, column.Name)
+			}
+			acceptedHeaders[header] = column.Name
 		}
 	}
 	return nil
