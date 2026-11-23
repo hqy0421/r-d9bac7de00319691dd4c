@@ -1,0 +1,155 @@
+{
+	"Records": [
+		{
+			"Children": [
+				{
+					"Children": [
+						{
+							"Children": null,
+							"Data": "D8",
+							"FirstChild": null,
+							"FormatSpecific": null,
+							"LastChild": null,
+							"NextSibling": null,
+							"Parent": "(ElementNode d8)",
+							"PrevSibling": null,
+							"Type": "TextNode"
+						}
+					],
+					"Data": "d8",
+					"FirstChild": "(TextNode 'D8')",
+					"FormatSpecific": null,
+					"LastChild": "(TextNode 'D8')",
+					"NextSibling": "(ElementNode d_date)",
+					"Parent": "(ElementNode DMG)",
+					"PrevSibling": null,
+					"Type": "ElementNode"
+				},
+				{
+					"Children": [
+						{
+							"Children": null,
+							"Data": "19910512",
+							"FirstChild": null,
+							"FormatSpecific": null,
+							"LastChild": null,
+							"NextSibling": null,
+							"Parent": "(ElementNode d_date)",
+							"PrevSibling": null,
+							"Type": "TextNode"
+						}
+					],
+					"Data": "d_date",
+					"FirstChild": "(TextNode '19910512')",
+					"FormatSpecific": null,
+					"LastChild": "(TextNode '19910512')",
+					"NextSibling": "(ElementNode d_cat)",
+					"Parent": "(ElementNode DMG)",
+					"PrevSibling": "(ElementNode d8)",
+					"Type": "ElementNode"
+				},
+				{
+					"Children": [
+						{
+							"Children": null,
+							"Data": "RET",
+							"FirstChild": null,
+							"FormatSpecific": null,
+							"LastChild": null,
+							"NextSibling": null,
+							"Parent": "(ElementNode d_cat)",
+							"PrevSibling": null,
+							"Type": "TextNode"
+						}
+					],
+					"Data": "d_cat",
+					"FirstChild": "(TextNode 'RET')",
+					"FormatSpecific": null,
+					"LastChild": "(TextNode 'RET')",
+					"NextSibling": "(ElementNode d_cat)",
+					"Parent": "(ElementNode DMG)",
+					"PrevSibling": "(ElementNode d_date)",
+					"Type": "ElementNode"
+				},
+				{
+					"Children": [
+						{
+							"Children": null,
+							"Data": "RET",
+							"FirstChild": null,
+							"FormatSpecific": null,
+							"LastChild": null,
+							"NextSibling": null,
+							"Parent": "(ElementNode d_cat)",
+							"PrevSibling": null,
+							"Type": "TextNode"
+						}
+					],
+					"Data": "d_cat",
+					"FirstChild": "(TextNode 'RET')",
+					"FormatSpecific": null,
+					"LastChild": "(TextNode 'RET')",
+					"NextSibling": "(ElementNode d_code)",
+					"Parent": "(ElementNode DMG)",
+					"PrevSibling": "(ElementNode d_cat)",
+					"Type": "ElementNode"
+				},
+				{
+					"Children": [
+						{
+							"Children": null,
+							"Data": "2135-2",
+							"FirstChild": null,
+							"FormatSpecific": null,
+							"LastChild": null,
+							"NextSibling": null,
+							"Parent": "(ElementNode d_code)",
+							"PrevSibling": null,
+							"Type": "TextNode"
+						}
+					],
+					"Data": "d_code",
+					"FirstChild": "(TextNode '2135-2')",
+					"FormatSpecific": null,
+					"LastChild": "(TextNode '2135-2')",
+					"NextSibling": "(ElementNode d_code)",
+					"Parent": "(ElementNode DMG)",
+					"PrevSibling": "(ElementNode d_cat)",
+					"Type": "ElementNode"
+				},
+				{
+					"Children": [
+						{
+							"Children": null,
+							"Data": "2106-3",
+							"FirstChild": null,
+							"FormatSpecific": null,
+							"LastChild": null,
+							"NextSibling": null,
+							"Parent": "(ElementNode d_code)",
+							"PrevSibling": null,
+							"Type": "TextNode"
+						}
+					],
+					"Data": "d_code",
+					"FirstChild": "(TextNode '2106-3')",
+					"FormatSpecific": null,
+					"LastChild": "(TextNode '2106-3')",
+					"NextSibling": null,
+					"Parent": "(ElementNode DMG)",
+					"PrevSibling": "(ElementNode d_code)",
+					"Type": "ElementNode"
+				}
+			],
+			"Data": "DMG",
+			"FirstChild": "(ElementNode d8)",
+			"FormatSpecific": null,
+			"LastChild": "(ElementNode d_code)",
+			"NextSibling": null,
+			"Parent": "(DocumentNode)",
+			"PrevSibling": null,
+			"Type": "ElementNode"
+		}
+	],
+	"FinalErr": "EOF"
+}
